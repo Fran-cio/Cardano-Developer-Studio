@@ -26,8 +26,10 @@ cardano_dev_tools() {
       echo "1) Cabal Build All"
       echo "2) Cabal Test All"
       echo "3) Run Example Contract CLI"
-      echo "4) Docker Logs"
-      echo "5) Delete this Container and Optionally Its Volumes"
+      if [[ $do_local_execution == 1 || !(-z $INSIDE_DEV_CONTAINER) ]]; then
+        echo "4) Docker Logs"
+        echo "5) Delete this Container and Optionally Its Volumes"
+      fi
       echo "0) Return Main Menu"
       read -p "Enter your choice or 0 to exit: " tool_choice
 
@@ -62,16 +64,24 @@ cardano_dev_tools() {
           contract_type_selector
           read -p "Press Enter to continue..."
           ;;
-
         4)
-          monitor_logs "$selected_container"
-          read -p "Press Enter to continue..."
+          if [[ $do_local_execution == 1 || !(-z $INSIDE_DEV_CONTAINER) ]]; then
+            monitor_logs "$selected_container"
+            read -p "Press Enter to continue..."
+          else
+            echo "Invalid choice, please select a valid option."
+            read -p "Press Enter to continue..."
+          fi
           ;;
-
         5)
-          delete_container_and_optionally_volumes "$selected_container"
-          break 2 # Breaks out of the current loop and the container selection loop
-          read -p "Press Enter to continue..."
+          if [[ $do_local_execution == 1 || !(-z $INSIDE_DEV_CONTAINER) ]]; then
+            delete_container_and_optionally_volumes "$selected_container"
+            break 2 # Breaks out of the current loop and the container selection loop
+            read -p "Press Enter to continue..."
+          else
+            echo "Invalid choice, please select a valid option."
+            read -p "Press Enter to continue..."
+          fi
           ;;
         0)
           break 2 # Breaks out of the current loop and the container selection loop
